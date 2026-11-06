@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Tulip (laleh) emblem, 108dp adaptive icon foreground, safe zone 66dp -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <!-- gold ring -->
+    <path
+        android:fillColor="#00000000"
+        android:strokeColor="#C9A45C"
+        android:strokeWidth="1.6"
+        android:pathData="M54,24a30,30 0,1 1,0 60a30,30 0,1 1,0 -60z" />
+    <!-- stem -->
+    <path
+        android:fillColor="#00000000"
+        android:strokeColor="#7E9A55"
+        android:strokeWidth="2.4"
+        android:strokeLineCap="round"
+        android:pathData="M54,58 C54,66 54,72 54,78" />
+    <!-- leaves -->
+    <path
+        android:fillColor="#7E9A55"
+        android:pathData="M54,74 C47,72 42,66 41,60 C47,62 52,66 54,74z" />
+    <path
+        android:fillColor="#7E9A55"
+        android:pathData="M54,70 C61,68 66,62 67,56 C61,58 56,62 54,70z" />
+    <!-- tulip petals -->
+    <path
+        android:fillColor="#B23A3A"
+        android:pathData="M54,60 C44,60 40,52 41,40 L47,45 L54,34 L61,45 L67,40 C68,52 64,60 54,60z" />
+    <path
+        android:fillColor="#D9564F"
+        android:pathData="M54,60 C49,58 47,50 48,42 L54,34 L60,42 C61,50 59,58 54,60z" />
+</vector>
