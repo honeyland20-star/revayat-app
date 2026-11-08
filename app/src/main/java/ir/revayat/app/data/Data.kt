@@ -46,8 +46,8 @@ class Content(val categories: List<String>, val people: List<Person>) {
 
 object Repository {
     @Volatile private var cached: Content? = null
-    private val photoCache = HashMap<String, Bitmap?>()
-    private var photoFiles: Set<String>? = null
+    private val imageCache = HashMap<String, Bitmap?>()
+    private val folderFiles = HashMap<String, Set<String>>()
 
     fun load(context: Context): Content {
         cached?.let { return it }
@@ -90,20 +90,30 @@ object Repository {
     private fun JSONArray.strings(): List<String> = (0 until length()).map { getString(it) }
 
     /** Real photo supplied by the owner in assets/photos/<id>.(jpg|jpeg|png|webp), or null. */
+    fun photo(context: Context, id: String): Bitmap? = image(context, "photos", id)
+
+    /** Decorative image in assets/<folder>/<name>.(jpg|jpeg|png|webp), or null. Cached, downsampled. */
     @Synchronized
-    fun photo(context: Context, id: String): Bitmap? {
-        if (photoCache.containsKey(id)) return photoCache[id]
-        val files = photoFiles ?: (context.assets.list("photos")?.toSet() ?: emptySet()).also { photoFiles = it }
-        val name = listOf("jpg", "jpeg", "png", "webp").map { "$id.$it" }.firstOrNull { it in files }
-        val bmp = name?.let { n ->
+    fun image(context: Context, folder: String, name: String): Bitmap? {
+        val key = "$folder/$name"
+        if (imageCache.containsKey(key)) return imageCache[key]
+        val files = folderFiles.getOrPut(folder) { context.assets.list(folder)?.toSet() ?: emptySet() }
+        val file = listOf("jpg", "jpeg", "png", "webp").map { "$name.$it" }.firstOrNull { it in files }
+        val bmp = file?.let { f ->
             runCatching {
-                context.assets.open("photos/$n").use { stream ->
-                    val opts = BitmapFactory.Options().apply { inPreferredConfig = Bitmap.Config.ARGB_8888 }
-                    BitmapFactory.decodeStream(stream, null, opts)
+                val path = "$folder/$f"
+                val bounds = BitmapFactory.Options().apply { inJustDecodeBounds = true }
+                context.assets.open(path).use { BitmapFactory.decodeStream(it, null, bounds) }
+                var sample = 1
+                while (maxOf(bounds.outWidth, bounds.outHeight) / (sample * 2) >= 1400) sample *= 2
+                val opts = BitmapFactory.Options().apply {
+                    inSampleSize = sample
+                    inPreferredConfig = Bitmap.Config.ARGB_8888
                 }
+                context.assets.open(path).use { BitmapFactory.decodeStream(it, null, opts) }
             }.getOrNull()
         }
-        photoCache[id] = bmp
+        imageCache[key] = bmp
         return bmp
     }
 }

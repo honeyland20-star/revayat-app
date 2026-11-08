@@ -2,6 +2,7 @@ package ir.revayat.app.ui.screens
 
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.Crossfade
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.tween
@@ -105,7 +106,9 @@ fun StoryScreen(id: String) {
     }
 
     Box(Modifier.fillMaxSize().background(Ink)) {
-        PersonVisual(person, Modifier.fillMaxSize(), animated = true)
+        Crossfade(targetState = index, animationSpec = tween(700), label = "bg") { i ->
+            PersonVisual(person, Modifier.fillMaxSize(), animated = true, slide = i, framed = true, frameTop = 118.dp, frameHeight = 0.46f)
+        }
         Box(
             Modifier.fillMaxSize().background(
                 Brush.verticalGradient(

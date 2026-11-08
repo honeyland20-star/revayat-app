@@ -40,10 +40,12 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import ir.revayat.app.ui.components.AssetBackdrop
 import ir.revayat.app.ui.components.Embers
 import ir.revayat.app.ui.components.GirihArt
 import ir.revayat.app.ui.components.TulipLogo
@@ -68,7 +70,16 @@ fun SplashScreen(onDone: () -> Unit) {
         onDone()
     }
     Box(Modifier.fillMaxSize().background(Ink), contentAlignment = Alignment.Center) {
-        GirihArt(Color(0xFF14201A), Gold, seed = 11, showTulip = false, modifier = Modifier.fillMaxSize())
+        AssetBackdrop("splash", Modifier.fillMaxSize()) {
+            GirihArt(Color(0xFF14201A), Gold, seed = 11, showTulip = false, modifier = Modifier.fillMaxSize())
+        }
+        Box(
+            Modifier.fillMaxSize().background(
+                Brush.verticalGradient(
+                    0f to Color.Black.copy(alpha = 0.35f), 0.5f to Color.Black.copy(alpha = 0.55f), 1f to Color.Black.copy(alpha = 0.25f),
+                ),
+            ),
+        )
         Embers(Modifier.fillMaxSize(), color = Gold)
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
             TulipLogo(
@@ -126,7 +137,14 @@ fun OnboardingScreen(onDone: () -> Unit) {
         HorizontalPager(pager, Modifier.fillMaxSize()) { i ->
             val p = pages[i]
             Box(Modifier.fillMaxSize()) {
-                GirihArt(Color(0xFF121A16), p.accent, seed = p.seed, modifier = Modifier.fillMaxSize())
+                AssetBackdrop("onboarding${i + 1}", Modifier.fillMaxSize()) {
+                    GirihArt(Color(0xFF121A16), p.accent, seed = p.seed, modifier = Modifier.fillMaxSize())
+                }
+                Box(
+                    Modifier.fillMaxSize().background(
+                        Brush.verticalGradient(0f to Color.Black.copy(alpha = 0.25f), 0.4f to Color.Transparent, 0.62f to Color.Black.copy(alpha = 0.6f), 1f to Color.Black.copy(alpha = 0.95f)),
+                    ),
+                )
                 Column(
                     Modifier.align(Alignment.BottomCenter).fillMaxWidth().padding(horizontal = 32.dp)
                         .padding(bottom = 170.dp),

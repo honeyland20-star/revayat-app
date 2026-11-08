@@ -19,6 +19,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
@@ -54,6 +55,7 @@ import androidx.compose.ui.unit.dp
 import ir.revayat.app.ui.LocalAppState
 import ir.revayat.app.ui.LocalContent
 import ir.revayat.app.ui.LocalNav
+import ir.revayat.app.ui.components.AssetBackdrop
 import ir.revayat.app.ui.components.Chip
 import ir.revayat.app.ui.components.PersonVisual
 import ir.revayat.app.ui.components.PosterCard
@@ -177,7 +179,7 @@ private fun WeekBanner(weekDay: Int, unlockAll: Boolean) {
     val t = rememberInfiniteTransition(label = "banner")
     val shift by t.animateFloat(0f, 1f, infiniteRepeatable(tween(6000, easing = LinearEasing), RepeatMode.Reverse), label = "s")
     Box(
-        Modifier.padding(horizontal = 20.dp).fillMaxWidth().clip(RoundedCornerShape(26.dp))
+        Modifier.padding(horizontal = 20.dp).fillMaxWidth().heightIn(min = 170.dp).clip(RoundedCornerShape(26.dp))
             .background(
                 Brush.linearGradient(
                     listOf(Color(0xFF2A3B22), Color(0xFF1A241D), Color(0xFF3A2A16)),
@@ -185,15 +187,21 @@ private fun WeekBanner(weekDay: Int, unlockAll: Boolean) {
                     end = androidx.compose.ui.geometry.Offset(800f * (0.6f + shift), 600f),
                 ),
             )
-            .border(1.dp, Gold.copy(alpha = 0.35f), RoundedCornerShape(26.dp))
-            .padding(20.dp),
+            .border(1.dp, Gold.copy(alpha = 0.35f), RoundedCornerShape(26.dp)),
     ) {
-        Column {
+        AssetBackdrop("banner", Modifier.matchParentSize()) {}
+        // darken the right (text) side; the banner art sits on the left
+        Box(
+            Modifier.matchParentSize().background(
+                Brush.horizontalGradient(0f to Color.Black.copy(alpha = 0.1f), 0.45f to Color.Black.copy(alpha = 0.55f), 1f to Color.Black.copy(alpha = 0.88f)),
+            ),
+        )
+        Column(Modifier.padding(20.dp).fillMaxWidth(0.82f)) {
             Chip("۲۹ آبان تا ۵ آذر")
             Spacer(Modifier.height(10.dp))
             Text(title, style = MaterialTheme.typography.headlineSmall, color = Cream)
             Spacer(Modifier.height(4.dp))
-            Text(sub, style = MaterialTheme.typography.bodyMedium, color = Cream.copy(alpha = 0.75f))
+            Text(sub, style = MaterialTheme.typography.bodyMedium, color = Cream.copy(alpha = 0.85f))
         }
     }
 }
@@ -231,7 +239,7 @@ private fun HeroCard(p: ir.revayat.app.data.Person, onPlay: () -> Unit) {
         Modifier.padding(horizontal = 20.dp).fillMaxWidth().height(440.dp).clip(RoundedCornerShape(30.dp))
             .clickable(onClick = onPlay),
     ) {
-        PersonVisual(p, Modifier.fillMaxSize(), animated = true)
+        PersonVisual(p, Modifier.fillMaxSize(), animated = true, framed = true, frameTop = 22.dp, frameHeight = 0.44f)
         Box(
             Modifier.fillMaxSize().background(
                 Brush.verticalGradient(0.3f to Color.Transparent, 1f to Color.Black.copy(alpha = 0.92f)),

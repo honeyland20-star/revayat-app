@@ -9,6 +9,16 @@ import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.draw.blur
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.dp
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
@@ -35,12 +45,25 @@ import kotlin.math.sin
 /**
  * Hero visual for a person: their real photo if the owner added one to assets/photos,
  * otherwise a generative "girih" artwork in the person's colours.
- * [animated] adds a slow Ken-Burns zoom.
+ * [animated] adds a slow Ken-Burns zoom. [slide] picks assets/photos/<id>_<n> when present.
+ * [framed] shows small (low-resolution) photos as a framed portrait over a blurred copy,
+ * instead of stretching them across the whole area.
  */
 @Composable
-fun PersonVisual(person: Person, modifier: Modifier = Modifier, animated: Boolean = false, showTulip: Boolean = true) {
+fun PersonVisual(
+    person: Person,
+    modifier: Modifier = Modifier,
+    animated: Boolean = false,
+    showTulip: Boolean = true,
+    slide: Int? = null,
+    framed: Boolean = false,
+    frameTop: Dp = 24.dp,
+    frameHeight: Float = 0.58f,
+) {
     val context = LocalContext.current
-    val photo = remember(person.id) { Repository.photo(context, person.id) }
+    val photo = remember(person.id, slide) {
+        (slide?.let { Repository.photo(context, "${person.id}_${it + 1}") }) ?: Repository.photo(context, person.id)
+    }
     val scale = if (animated) {
         val t = rememberInfiniteTransition(label = "kb")
         val s by t.animateFloat(
@@ -53,12 +76,34 @@ fun PersonVisual(person: Person, modifier: Modifier = Modifier, animated: Boolea
 
     Box(modifier.background(person.colorDark)) {
         if (photo != null) {
-            Image(
-                bitmap = remember(photo) { photo.asImageBitmap() },
-                contentDescription = person.name,
-                contentScale = ContentScale.Crop,
-                modifier = Modifier.fillMaxSize().graphicsLayer { scaleX = scale; scaleY = scale },
-            )
+            val img = remember(photo) { photo.asImageBitmap() }
+            val small = photo.width < 700
+            if (framed && small) {
+                Image(
+                    bitmap = img, contentDescription = null, contentScale = ContentScale.Crop,
+                    modifier = Modifier.fillMaxSize().blur(28.dp).graphicsLayer { alpha = 0.55f; scaleX = 1.2f; scaleY = 1.2f },
+                )
+                Box(Modifier.fillMaxSize().background(person.colorDark.copy(alpha = 0.35f)))
+                Image(
+                    bitmap = img,
+                    contentDescription = person.name,
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier.align(Alignment.TopCenter).padding(top = frameTop)
+                        .fillMaxHeight(frameHeight)
+                        .aspectRatio(photo.width.toFloat() / photo.height)
+                        .graphicsLayer { scaleX = 0.96f + (scale - 1f) * 0.4f; scaleY = scaleX }
+                        .clip(RoundedCornerShape(22.dp))
+                        .border(1.5.dp, person.colorAccent.copy(alpha = 0.7f), RoundedCornerShape(22.dp)),
+                )
+            } else {
+                Image(
+                    bitmap = img,
+                    contentDescription = person.name,
+                    contentScale = ContentScale.Crop,
+                    alignment = Alignment.TopCenter,
+                    modifier = Modifier.fillMaxSize().graphicsLayer { scaleX = scale; scaleY = scale },
+                )
+            }
         } else {
             GirihArt(
                 dark = person.colorDark,
@@ -69,6 +114,25 @@ fun PersonVisual(person: Person, modifier: Modifier = Modifier, animated: Boolea
             )
         }
     }
+}
+
+/** Full-bleed decorative image from assets/images/<name>, or [fallback] if it isn't there. */
+@Composable
+fun AssetBackdrop(name: String, modifier: Modifier = Modifier, animated: Boolean = true, fallback: @Composable () -> Unit) {
+    val context = LocalContext.current
+    val bmp = remember(name) { Repository.image(context, "images", name) }
+    if (bmp == null) { Box(modifier) { fallback() }; return }
+    val scale = if (animated) {
+        val t = rememberInfiniteTransition(label = "bd")
+        val s by t.animateFloat(1f, 1.08f, infiniteRepeatable(tween(16000, easing = LinearEasing), RepeatMode.Reverse), label = "bds")
+        s
+    } else 1f
+    Image(
+        bitmap = remember(bmp) { bmp.asImageBitmap() },
+        contentDescription = null,
+        contentScale = ContentScale.Crop,
+        modifier = modifier.graphicsLayer { scaleX = scale; scaleY = scale },
+    )
 }
 
 @Composable

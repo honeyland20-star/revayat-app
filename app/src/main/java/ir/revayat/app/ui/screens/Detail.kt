@@ -90,6 +90,9 @@ fun DetailScreen(id: String) {
                         p,
                         Modifier.fillMaxSize().graphicsLayer { translationY = heroOffset * 0.5f; alpha = 1f - (heroOffset / 900f).coerceIn(0f, 0.6f) },
                         animated = true,
+                        framed = true,
+                        frameTop = 64.dp,
+                        frameHeight = 0.6f,
                     )
                     Box(
                         Modifier.fillMaxSize().background(
